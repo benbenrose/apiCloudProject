@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>注册</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body>
+        <div class="reg-body">
+            <div class="reg-icon-box">
+                <div class="box">
+                    <img class="icon" src="../images/head_icon.png">
+                </div>
+            </div>
+            <div class="reg-ipt-box">
+                <div class="ipt-box">
+                    <i class="t-icon">&#xe657;</i>
+                    <input class="ipt" et="input:iptEvt" attr-val="name" type="text"/>
+                    <i class="f-icon" et="tap:clearEvt">&#xe6ed;</i>
+                </div>
+                <div class="ipt-box">
+                    <i class="t-icon">&#xe71c;</i>
+                    <input class="ipt" et="input:iptEvt" attr-val="password" type="text"/>
+                    <i class="f-icon" et="tap:clearEvt">&#xe6ed;</i>
+                </div>
+                <div class="ipt-box">
+                    <i class="t-icon">&#xe692;</i>
+                    <input class="ipt" et="input:iptEvt" attr-val="phone" type="text"/>
+                    <i class="f-icon" et="tap:clearEvt">&#xe6ed;</i>
+                </div>
+                <div class="ipt-box">
+                    <i class="t-icon">&#xe647;</i>
+                    <input class="ipt w50" et="input:iptEvt" attr-val="verify" type="text"/>
+                    <span class="verify-btn" et="tap:getVerify">获取验证码</span>
+                </div>
+                <div>
+                    <span></span>
+                </div>
+            </div>
+            <div class="reg-btn-box">
+                <div class="btn-cls" et="tap:registerEvt">注册</div>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var subParams = {
+                    name: '',
+                    password: '',
+                    phone: '',
+                    verify: ''
+                },
+                submitFlag = false,
+                startTime = 0,
+                counter = 60,
+                timer = null;
+        $(function () {
+            App.pageEvents.iptEvt = function (node) {
+                var nVal = subParams[node.attr('attr-val')] = node.val();
+                var val = nVal.replace(/\s/g, '');
+                if(val !== '') {
+                    node.siblings('i.f-icon').show();
+                } else {
+                    node.siblings('i.f-icon').hide();
+                }
+            };
+            App.pageEvents.getVerify = function (node) {
+                if(!submitFlag) {
+                    var _p = subParams.phone;
+                    _p = _p.replace(/\s/g, '');
+                    if(/^[1]{1}[0-9]{10}$/.test(_p)) {
+                        submitFlag = true;
+                        App.featchData({
+                            url: 'user/verifyCode',
+                                method: 'post',
+                            data: {phone: subParams.phone},
+                            callback: function (data) {
+                                if(+data.code === 200) {
+                                    startTime = Date.now();
+                                    node.addClass('active');
+                                    App.promptBox('验证码是 : ' + data.data.code);
+                                    verifyCounter(node);
+                                } else {
+                                    App.promptBox(data.message);
+                                    submitFlag = false;
+                                }
+                            }
+                        });
+                    } else {
+                        App.promptBox('请输入正确的手机号码');
+                    }
+                }
+            };
+            App.pageEvents.clearEvt = function (node) {
+                var ipt = node.siblings('input.ipt');
+                ipt.val('');
+                node.hide();
+                subParams[ipt.attr('attr-val')] = ipt.val();
+            };
+            App.pageEvents.registerEvt = function () {
+                if(subParams.name.replace(/\s/g, '') === '') {
+                    App.promptBox('用户名不能为空');
+                    return;
+                }
+                if(subParams.password.replace(/\s/g, '') === '') {
+                    App.promptBox('密码不能为空');
+                    return;
+                }
+                if(subParams.phone.replace(/\s/g, '') === '') {
+                    App.promptBox('手机号不能为空');
+                    return;
+                }
+                if(!/^[1]{1}[0-9]{10}$/.test(subParams.phone)) {
+                    App.promptBox('请输入正确的手机号');
+                    return;
+                }
+                if(subParams.verify.replace(/\s/g, '') === '') {
+                    App.promptBox('验证码不能为空');
+                    return;
+                }
+                App.featchData({
+                    url: 'user/register',
+                    method: 'post',
+                    data: subParams,
+                    callback: function (data) {
+                        if(+data.code === 200) {
+                            var cache = data.data;
+                            localStorage.setItem('user-login-info', JSON.stringify(cache));
+                            window.location.href = 'index.html';
+                        } else {
+                            App.promptBox(data.message);
+                        }
+                    }
+                });
+            };
+        });
+        function verifyCounter(node) {
+            timer = setTimeout(function () {
+                var _dis = counter - Math.ceil((Date.now() - startTime)/1000);
+                if(_dis > 0) {
+                    verifyCounter(node);
+                    node.text('重新获取(' + (_dis) + ')');
+                } else {
+                    clearTimeout(timer);
+                    timer = null;
+                    submitFlag = false;
+                    node.removeClass('active');
+                    node.text('获取验证码');
+                }
+            }, 50);
+        }
+    </script>
+</html>

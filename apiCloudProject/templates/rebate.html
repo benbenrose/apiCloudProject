@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>返佣记录</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body class="index-main-body">
+        <div class="scroll-box">
+            <div class="index-header fixed-header">
+                <i et="tap:backEvt" class="back-icon">&#xe7e9;</i>
+                <span class="label with-icon">返佣记录</span>
+            </div>
+            <div id="editList" class="edit-ul mt65">
+                <!--list content-->
+            </div>
+        </div>
+    </body>
+    <script type="text/x-dot-template" id="list-tpl">
+        {{~ it : value : index}}
+        <div class="per-li consume-box ptb10">
+            <i class="icon">&#xe662;</i>
+            <span class="amount">{{= value.amount}}<em class="unit">元</em></span>
+            <span class="description">{{= value.description}}</span>
+        </div>
+        {{~}}
+    </script>
+    <script type="text/javascript">
+        App.startLoading();
+        $(function () {
+            initPage();
+            App.pageEvents.backEvt = function () {
+                window.location.href = 'index.html';
+            };
+        });
+        function initPage() {
+            var cache = localStorage.getItem('user-login-info'),
+                    userId = '';
+            try {
+                userId = JSON.parse(cache).userId;
+            } catch (e) {
+                App.stopLoading();
+                App.promptBox('你还没有商铺');
+                return;
+            }
+            App.featchData({
+                url: 'shops/getRebateList',
+                method: 'post',
+                data: {userId: userId},
+                callback: function (data) {
+                    App.stopLoading();
+                    if(+data.code === 200) {
+                        var tpl = doT.template($("#list-tpl").text());
+                        $("#editList").html(tpl(data.data));
+                    } else {
+                        App.promptBox(data.message);
+                    }
+                }
+            });
+        }
+    </script>
+</html>

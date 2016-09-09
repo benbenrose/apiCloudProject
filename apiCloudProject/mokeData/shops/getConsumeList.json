@@ -1,0 +1,150 @@
+{
+  "code": "200",
+  "message": "your request not invalid",
+  "data": [
+    {
+      "amount": "14562.59",
+      "description": "购买新希望15729箱鲜牛奶;"
+    },
+    {
+      "amount": "22335.75",
+      "description": "购买新希望16箱鲜牛奶;"
+    },
+    {
+      "amount": "2162.97",
+      "description": "购买新希望17616箱鲜牛奶;"
+    },
+    {
+      "amount": "23418.82",
+      "description": "购买新希望21777箱鲜牛奶;"
+    },
+    {
+      "amount": "13567.41",
+      "description": "购买新希望15736箱鲜牛奶;"
+    },
+    {
+      "amount": "3960.53",
+      "description": "购买新希望17901箱鲜牛奶;"
+    },
+    {
+      "amount": "3170.40",
+      "description": "购买新希望11678箱鲜牛奶;"
+    },
+    {
+      "amount": "15207.29",
+      "description": "购买新希望18581箱鲜牛奶;"
+    },
+    {
+      "amount": "21797.42",
+      "description": "购买新希望17168箱鲜牛奶;"
+    },
+    {
+      "amount": "12057.77",
+      "description": "购买新希望12291箱鲜牛奶;"
+    },
+    {
+      "amount": "20984.51",
+      "description": "购买新希望564箱鲜牛奶;"
+    },
+    {
+      "amount": "18699.38",
+      "description": "购买新希望19355箱鲜牛奶;"
+    },
+    {
+      "amount": "1509.33",
+      "description": "购买新希望836箱鲜牛奶;"
+    },
+    {
+      "amount": "5377.62",
+      "description": "购买新希望9799箱鲜牛奶;"
+    },
+    {
+      "amount": "18994.38",
+      "description": "购买新希望3618箱鲜牛奶;"
+    },
+    {
+      "amount": "15988.66",
+      "description": "购买新希望8576箱鲜牛奶;"
+    },
+    {
+      "amount": "19955.14",
+      "description": "购买新希望15683箱鲜牛奶;"
+    },
+    {
+      "amount": "14695.89",
+      "description": "购买新希望9606箱鲜牛奶;"
+    },
+    {
+      "amount": "7257.75",
+      "description": "购买新希望14877箱鲜牛奶;"
+    },
+    {
+      "amount": "13.84",
+      "description": "购买新希望15106箱鲜牛奶;"
+    },
+    {
+      "amount": "21951.32",
+      "description": "购买新希望5912箱鲜牛奶;"
+    },
+    {
+      "amount": "23108.25",
+      "description": "购买新希望16720箱鲜牛奶;"
+    },
+    {
+      "amount": "14987.40",
+      "description": "购买新希望15211箱鲜牛奶;"
+    },
+    {
+      "amount": "12205.48",
+      "description": "购买新希望9281箱鲜牛奶;"
+    },
+    {
+      "amount": "10626.26",
+      "description": "购买新希望14012箱鲜牛奶;"
+    },
+    {
+      "amount": "6295.74",
+      "description": "购买新希望7921箱鲜牛奶;"
+    },
+    {
+      "amount": "11892.42",
+      "description": "购买新希望7237箱鲜牛奶;"
+    },
+    {
+      "amount": "14262.86",
+      "description": "购买新希望20840箱鲜牛奶;"
+    },
+    {
+      "amount": "7678.58",
+      "description": "购买新希望20067箱鲜牛奶;"
+    },
+    {
+      "amount": "23025.01",
+      "description": "购买新希望18142箱鲜牛奶;"
+    },
+    {
+      "amount": "10769.29",
+      "description": "购买新希望17574箱鲜牛奶;"
+    },
+    {
+      "amount": "10835.09",
+      "description": "购买新希望8241箱鲜牛奶;"
+    },
+    {
+      "amount": "19007.14",
+      "description": "购买新希望18434箱鲜牛奶;"
+    },
+    {
+      "amount": "17665.33",
+      "description": "购买新希望2207箱鲜牛奶;"
+    },
+    {
+      "amount": "12867.57",
+      "description": "购买新希望18178箱鲜牛奶;"
+    },
+    {
+      "amount": "625.56",
+      "description": "购买新希望15978箱鲜牛奶;"
+    }
+  ]
+}

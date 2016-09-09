@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>用户编辑</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body class="index-main-body">
+        <div class="scroll-box">
+            <div class="index-header">
+                <i et="tap:backEvt" class="back-icon">&#xe7e9;</i>
+                <span class="label with-icon">个人中心</span>
+            </div>
+            <div id="componentBox" style="display: none;">
+                <div class="edit-ul">
+                    <div class="img-box">
+                        <img et="tap:uploadIcon" attr-val="fileName" src="">
+                    </div>
+                    <div class="per-li ptb10">
+                        <span class="text">姓名</span>
+                        <input class="ipt" et="input:iptEvt" attr-val="name" type="text"/>
+                    </div>
+                    <div class="per-li ptb10">
+                        <span class="text">性别</span>
+                        <span class="radio" et="tap:checkSex" attr-val="female"><i class="radio-btn"></i>女</span>
+                        <span class="radio" et="tap:checkSex" attr-val="male"><i class="radio-btn"></i>男</span>
+                    </div>
+                </div>
+                <div class="edit-ul">
+                    <div class="per-li ptb10">
+                        <span class="text">手机</span>
+                        <input class="ipt" et="input:iptEvt" attr-val="phone" type="text"/>
+                    </div>
+                    <div class="per-li ptb10">
+                        <span class="text">密码</span>
+                        <input class="ipt" et="input:iptEvt" attr-val="password" type="text"/>
+                    </div>
+                </div>
+                <div class="edit-ul">
+                    <div class="per-li ptb10">
+                        <span class="text">地址</span>
+                        <textarea class="area" et="input:iptEvt" attr-val="address"></textarea>
+                    </div>
+                </div>
+                <div class="reg-btn-box">
+                    <span class="btn-cls" et="tap:saveEvt">保存</span>
+                </div>
+            </div>
+        </div>
+        <div style="display: none;">
+            <form id="myForm" target="myFrame" enctype="multipart/form-data">
+                <input type="file" name="fileName" id="fileName"/>
+            </form>
+            <iframe id="myFrame" name="myFrame"></iframe>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var subParams = { name: '', password: '', phone: '', address: '', sex: '', fileName: ''},
+                action = 'user/upload', method = 'POST';
+        $(function () {
+            getInitFunc();
+            App.pageEvents.backEvt = function () {
+                window.location.href = 'index.html';
+            };
+            App.pageEvents.iptEvt = function (node) {
+                var nVal = subParams[node.attr('attr-val')] = node.val();
+                var val = nVal.replace(/\s/g, '');
+                if(val !== '') {
+                    node.siblings('i.reset-icon').show();
+                } else {
+                    node.siblings('i.reset-icon').hide();
+                }
+            };
+            App.pageEvents.uploadIcon = function () {
+                $('#fileName').trigger('click');
+            }
+            $('#fileName').on('change', function (evt) {
+                try {
+                    var file = evt.target.files[0];
+                    var name = file.name;
+                    if(/^(\w*\.png)|(\w*\.jpg)$/.test(name)) {
+                        if(file.size > 500*1024) {
+                            App.promptBox('图片必须小于500');
+                            return;
+                        }
+                        var formNode = document.getElementById('myForm');
+                        formNode.action = action;
+                        formNode.method = method;
+                        iFrameReady();
+                        formNode.submit();
+                    } else {
+                        App.promptBox('图片必须为png或jpg格式');
+                    }
+                } catch (e) {
+                    console.log('pick file error');
+                }
+            });
+            App.pageEvents.checkSex = function (node) {
+                var cn = node.find("i");
+                if(!cn.hasClass('active')){
+                    cn.addClass('active');
+                    node.siblings('span.radio').find('i').removeClass('active');
+                    subParams.sex = node.attr('attr-val');
+                }
+            };
+            App.pageEvents.saveEvt = function () {
+                if(subParams.name.replace(/\s/g, '') === '') {
+                    App.promptBox('用户名不能为空');
+                    return;
+                }
+                if(subParams.phone.replace(/\s/g, '') === '') {
+                    App.promptBox('手机号不能为空');
+                    return;
+                }
+                if(subParams.password.replace(/\s/g, '') === '') {
+                    App.promptBox('密码不能为空');
+                    return;
+                }
+                App.startLoading();
+                App.featchData({
+                    url: 'user/saveInfo',
+                    method: 'post',
+                    data: subParams,
+                    callback: function (data) {
+                        if(+data.code === 200) {
+                            App.promptBox('保存成功', function () {
+                                window.location.href = 'index.html';
+                            });
+                        } else {
+                            App.stopLoading();
+                            App.promptBox(data.message);
+                        }
+                    }
+                });
+            };
+        });
+        function getInitFunc() {
+            var cache = localStorage.getItem('user-login-info'),
+                    userId = '';
+            try {
+                userId = JSON.parse(cache).userId;
+            } catch (e) {
+                return;
+            }
+            $("#componentBox").show();
+            App.featchData({
+                url: 'user/info',
+                method: 'post',
+                data: {userId: userId},
+                callback: function (data) {
+                    if(+data.code === 200) {
+                        subParams = data.data;
+                        var nodes = $("input[attr-val], img[attr-val], textarea[attr-val]");
+                        nodes.forEach(function (node) {
+                            var attr = node.getAttribute('attr-val');
+                            if(node.tagName === 'IMG') {
+                                node.setAttribute('src', subParams[attr]);
+                            }
+                            if(node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') {
+                                node.value = subParams[attr];
+                            }
+                        });
+                        subParams.sex === 'male' ? $('span[attr-val="male"]').find('i').addClass('active'):
+                                $('span[attr-val="female"]').find('i').addClass('active');
+                    } else {
+                        App.promptBox(data.message);
+                    }
+                }
+            });
+        }
+        function iFrameReady() {
+            document.getElementById('myFrame').onload = function () {
+                try {
+                    var text = this.contentWindow.document.body.innerText;
+                    if(typeof text === 'string') {
+                        text = JSON.stringify(text);
+                    }
+                    if(+text.code === 200) {
+                        subParams.fileName = text.fileName;
+                    } else {
+                        App.promptBox('上传头像失败，请重试');
+                    }
+                } catch (args) {
+                    App.promptBox('上传头像失败，请重试');
+                }
+            };
+        }
+    </script>
+</html>

@@ -1,0 +1,8 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "userId": 5652543,
+    "amount": "43242.432"
+  }
+}

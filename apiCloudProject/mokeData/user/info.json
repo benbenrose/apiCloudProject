@@ -1,0 +1,13 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "userId": 123231321,
+    "name": "sudeming",
+    "password": "123458",
+    "phone": "13691715060",
+    "address": "gaoxin tianfuerjie chengdu sichuan",
+    "sex": "male",
+    "fileName": "../images/easyicon.png"
+  }
+}

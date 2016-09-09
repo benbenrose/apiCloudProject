@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>提现</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body class="index-main-body">
+        <div class="scroll-box">
+            <div class="index-header">
+                <i et="tap:backEvt" class="back-icon">&#xe7e9;</i>
+                <span class="label with-icon">用户提现</span>
+            </div>
+            <div class="edit-ul">
+                <div class="per-li ptb10">
+                    <span class="text">银行卡</span>
+                    <input class="ipt" et="input:iptEvt" attr-val="cardNo" type="text"/>
+                    <i class="reset" et="tap:resetEvt">&#xe6ed;</i>
+                </div>
+            </div>
+            <div class="edit-ul">
+                <span class="withdraw-title">提取现金</span>
+                <div class="withdraw-input-box">
+                    <i class="cash-icon">&#xe6e4;</i>
+                    <input class="ipt" et="input:iptEvt" type="text" attr-val="amount" maxlength="11"/>
+                    <i class="reset" et="tap:resetEvt">&#xe659;</i>
+                </div>
+                <span class="withdraw-info">可用余额<span id="amountBox"></span>元</span>
+            </div>
+            <div class="edit-ul">
+                <div class="withdraw-verify">
+                    <i class="t-icon">&#xe692;</i>
+                    <input class="ipt" type="text" attr-val="phone" maxlength="11"/>
+                </div>
+                <div class="withdraw-verify">
+                    <i class="t-icon f26">&#xe647;</i>
+                    <input class="ipt w50" attr-val="verifyCode" type="text"/>
+                    <span class="verify-btn" et="tap:getVerify">获取验证码</span>
+                </div>
+            </div>
+            <div class="reg-btn-box">
+                <span class="btn-cls" id="submitBtn" et="tap:confirmEvt">确认提取</span>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var subParams = {cardNo: '', amount: '', verify: '', verifyCode: ''},
+                amountBox = 0,
+                getVerifyFlag = false,
+                timer = null,
+                counter = 60,
+                startTime = '';
+        $(function () {
+            getTotalAmount();
+            App.pageEvents.backEvt = function () {
+                window.location.href = 'index.html';
+            };
+            App.pageEvents.iptEvt = function (node) {
+                var nVal = node.val();
+                var val = nVal.replace(/\s/g, '');
+                val !== '' ? node.siblings('i.reset').show() : node.siblings('i.reset').hide();
+            };
+            App.pageEvents.resetEvt = function (node) {
+                node.siblings('input').val('');
+                node.hide();
+            };
+            App.pageEvents.confirmEvt = function () {
+                subParams.cardNo = $('input[attr-val="cardNo"]').val();
+                if(!/^[0-9]{16,22}$/.test(subParams.cardNo)) {
+                    App.promptBox('请输入正确的银行卡号');
+                    return;
+                }
+                subParams.amount = $('input[attr-val="amount"]').val();
+                if(!/^[0-9]{1,11}$/.test(subParams.amount)) {
+                    App.promptBox('请输入正确的金额');
+                    return;
+                }
+                subParams.phone = $('input[attr-val="phone"]').val();
+                if(!/^[1]{1}[0-9]{10}$/.test(subParams.phone)) {
+                    App.promptBox('请输入正确的手机号');
+                    return;
+                }
+                subParams.verifyCode = $('input[attr-val="verifyCode"]').val();
+                if(subParams.verifyCode == '') {
+                    App.promptBox('请输入正确的验证码');
+                    return;
+                }
+                App.startLoading();
+                App.featchData({
+                    url: 'shops/getWithdraw',
+                    method: 'post',
+                    data: subParams,
+                    callback: function (data) {
+                        if(+data.code === 200) {
+                            App.promptBox('提取成功，请等待银行反馈', function () {
+                                window.location.href = 'index.html';
+                            });
+                        } else {
+                            App.stopLoading();
+                            App.promptBox(data.message);
+                        }
+                    }
+                });
+            };
+            App.pageEvents.getVerify = function (node) {
+                if(!getVerifyFlag) {
+                    var _p = $('input[attr-val="phone"]').val();
+                    _p = _p.replace(/\s/g, '');
+                    if(/^[1]{1}[0-9]{10}$/.test(_p)) {
+                        getVerifyFlag = true;
+                        App.featchData({
+                            url: 'user/verifyCode',
+                            method: 'post',
+                            data: {phone: _p},
+                            callback: function (data) {
+                                if(+data.code === 200) {
+                                    startTime = Date.now();
+                                    node.addClass('active');
+                                    App.promptBox('验证码是 : ' + data.data.code);
+                                    verifyCounter(node);
+                                } else {
+                                    App.promptBox(data.message);
+                                    getVerifyFlag = false;
+                                }
+                            }
+                        });
+                    } else {
+                        App.promptBox('请输入正确的手机号码');
+                    }
+                }
+            };
+        });
+        function getTotalAmount(){
+            var cache = localStorage.getItem('user-login-info'),
+                    userId = '';
+            try {
+                userId = JSON.parse(cache).userId;
+            } catch (e) {
+                App.promptBox('你还没有注册');
+                return;
+            }
+            App.featchData({
+                url: 'shops/getCashAmount',
+                method: 'post',
+                data: {userId: userId},
+                callback: function (data) {
+                    if(+data.code === 200) {
+                        amountBox = data.data.amount;
+                        $("#amountBox").text(amountBox);
+                    } else {
+                        App.promptBox(data.message);
+                    }
+                }
+            });
+        }
+        function verifyCounter(node) {
+            timer = setTimeout(function () {
+                var _dis = counter - Math.ceil((Date.now() - startTime)/1000);
+                if(_dis > 0) {
+                    verifyCounter(node);
+                    node.text('重新获取(' + (_dis) + ')');
+                } else {
+                    clearTimeout(timer);
+                    timer = null;
+                    getVerifyFlag = false;
+                    node.removeClass('active');
+                    node.text('获取验证码');
+                }
+            }, 50);
+        }
+    </script>
+</html>

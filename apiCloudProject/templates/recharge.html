@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta charset="UTF-8">
+    <title>充值</title>
+    <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+    <meta http-equiv="pragma" content="no-cache">
+    <meta http-equiv="cache-control" content="no-cache">
+    <link rel="stylesheet" type="text/css" href="../styles/style.css">
+    <script type="text/javascript" src="./zepto.js"></script>
+</head>
+<body class="index-main-body">
+<div class="scroll-box">
+    <div class="index-header">
+        <i et="tap:backEvt" class="back-icon">&#xe7e9;</i>
+        <span class="label with-icon">用户充值</span>
+    </div>
+    <div class="edit-ul">
+        <div class="per-li ptb10">
+            <span class="text">银行卡</span>
+            <input class="ipt" et="input:iptEvt" attr-val="cardNo" type="text"/>
+            <i class="reset" et="tap:resetEvt">&#xe6ed;</i>
+        </div>
+        <div class="per-li ptb10">
+            <span class="text">手机号</span>
+            <input class="ipt" et="input:iptEvt" attr-val="phone" type="text"/>
+            <i class="reset" et="tap:resetEvt">&#xe6ed;</i>
+        </div>
+        <div class="per-li ptb10">
+            <span class="text">金额</span>
+            <input class="ipt" et="input:iptEvt" attr-val="amount" type="text"/>
+            <i class="reset" et="tap:resetEvt">&#xe6ed;</i>
+        </div>
+    </div>
+    <div class="reg-btn-box">
+        <span class="btn-cls btn-invalid" id="submitBtn" et="tap:confirmEvt">确认充值</span>
+    </div>
+</div>
+</body>
+    <script type="text/javascript">
+        var submitFlag = false,
+                subParams = {amount: '', phone: '', cardNo: ''};
+        $(function () {
+            App.pageEvents.backEvt = function () {
+                window.location.href = 'index.html';
+            };
+            App.pageEvents.iptEvt = function (node) {
+                var nVal = subParams.amount = node.val();
+                var val = nVal.replace(/\s/g, '');
+                if(val !== '') {
+                    node.siblings('i.reset').show();
+                    var nodes = node.parents('div.edit-ul').find('input'),
+                            empty = false;
+                    nodes.forEach(function (el) {
+                        var nVal = subParams[el.getAttribute('attr-val')] = el.value;
+                        if(!empty) {
+                            empty = (nVal.replace(/\s/g, '') === '');
+                        }
+                    });
+                    submitFlag = !empty;
+                    !submitFlag ? '' : $("#submitBtn").hasClass('btn-invalid') ? $("#submitBtn").removeClass('btn-invalid') : '';
+                } else {
+                    node.siblings('i.reset').hide();
+                    submitFlag = false;
+                    $("#submitBtn").hasClass('btn-invalid') ? '' : $("#submitBtn").addClass('btn-invalid');
+                }
+            };
+            App.pageEvents.resetEvt = function (node) {
+                node.siblings('input').val('');
+                node.hide();
+                submitFlag = false;
+                $("#submitBtn").hasClass('btn-invalid') ? '' : $("#submitBtn").addClass('btn-invalid');
+            };
+            App.pageEvents.confirmEvt = function () {
+                if(!submitFlag) return;
+                if(!/^[0-9.]*$/.test(subParams.cardNo)) {
+                    App.promptBox('请输入正确的银行卡');
+                    return;
+                }
+                if(!/^[1]{1}[0-9]{10}$/.test(subParams.phone)) {
+                    App.promptBox('请输入正确的手机号');
+                    return;
+                }
+                if(!/^[0-9.]*$/.test(subParams.amount)) {
+                    App.promptBox('请输入正确的金额');
+                    return;
+                }
+                App.startLoading();
+                App.featchData({
+                    url: 'shops/getWithdraw',
+                    method: 'post',
+                    data: subParams,
+                    callback: function (data) {
+                        if(+data.code === 200) {
+                            App.promptBox('充值成功，请等待银行反馈', function () {
+                                window.location.href = 'index.html';
+                            });
+                        } else {
+                            App.stopLoading();
+                            App.promptBox(data.message);
+                        }
+                    }
+                });
+            };
+        });
+    </script>
+</html>

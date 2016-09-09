@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>商户申请</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body class="index-main-body">
+        <div class="scroll-box">
+            <div class="index-header">
+                <i et="tap:backEvt" class="back-icon">&#xe7e9;</i>
+                <span class="label with-icon">商户申请</span>
+            </div>
+            <div class="edit-ul">
+                <div class="img-box">
+                    <img et="tap:uploadIcon" attr-val="fileName" src="../images/head_icon.png">
+                </div>
+                <div class="per-li ptb10">
+                    <span class="text">名称</span>
+                    <input class="ipt" et="input:iptEvt" attr-val="name" type="text"/>
+                </div>
+                <div class="per-li ptb10">
+                    <span class="text">地区</span>
+                    <input class="ipt" et="input:iptEvt" attr-val="region" type="text"/>
+                </div>
+                <div class="per-li ptb10">
+                    <span class="text">详址</span>
+                    <input class="ipt" et="input:iptEvt" attr-val="address" type="text"/>
+                </div>
+            </div>
+            <div class="edit-ul">
+                <div class="per-li ptb10">
+                    <span class="text">简介</span>
+                    <textarea class="area" et="input:iptEvt" attr-val="remark"></textarea>
+                </div>
+            </div>
+            <div class="reg-btn-box">
+                <span class="btn-cls" et="tap:saveEvt">保存</span>
+            </div>
+        </div>
+        <div style="display: none;">
+            <form id="myForm" target="myFrame" enctype="multipart/form-data">
+                <input type="file" name="fileName" id="fileName"/>
+            </form>
+            <iframe id="myFrame" name="myFrame"></iframe>
+        </div>
+    </body>
+    <script type="text/javascript">
+        var subParams = { name: '', region: '', address: '', remark: '', fileName: ''},
+                action = 'shops/upload', method = 'POST';
+        $(function () {
+            App.pageEvents.backEvt = function () {
+                window.location.href = 'index.html';
+            };
+            App.pageEvents.iptEvt = function (node) {
+                var nVal = subParams[node.attr('attr-val')] = node.val();
+                var val = nVal.replace(/\s/g, '');
+                if(val !== '') {
+                    node.siblings('i.reset-icon').show();
+                } else {
+                    node.siblings('i.reset-icon').hide();
+                }
+            };
+            App.pageEvents.saveEvt = function () {
+                if(subParams.name.replace(/\s/g, '') === '') {
+                    App.promptBox('商铺名不能为空');
+                    return;
+                }
+                App.startLoading();
+                App.featchData({
+                    url: 'shops/applyAccount',
+                    method: 'post',
+                    data: subParams,
+                    callback: function (data) {
+                        if(+data.code === 200) {
+                            var cache = localStorage.getItem('user-login-info');
+                            cache = JSON.parse(cache);
+                            cache.shopId = data.data.shopId;
+                            localStorage.setItem('user-login-info', JSON.stringify(cache));
+                            App.promptBox('保存成功', function () {
+                                window.location.href = 'index.html';
+                            });
+                        } else {
+                            App.stopLoading();
+                            App.promptBox(data.message);
+                        }
+                    }
+                });
+            };
+            App.pageEvents.uploadIcon = function () {
+                $('#fileName').trigger('click');
+            }
+            $('#fileName').on('change', function (evt) {
+                try {
+                    var file = evt.target.files[0];
+                    var name = file.name;
+                    if(/^(\w*\.png)|(\w*\.jpg)$/.test(name)) {
+                        if(file.size > 500*1024) {
+                            App.promptBox('图片必须小于500');
+                            return;
+                        }
+                        var formNode = document.getElementById('myForm');
+                        formNode.action = action;
+                        formNode.method = method;
+                        iFrameReady();
+                        formNode.submit();
+                    } else {
+                        App.promptBox('图片必须为png或jpg格式');
+                    }
+                } catch (e) {
+                    console.log('pick file error');
+                }
+            });
+        });
+        function iFrameReady() {
+            document.getElementById('myFrame').onload = function () {
+                try {
+                    var text = this.contentWindow.document.body.innerText;
+                    if(typeof text === 'string') {
+                        text = JSON.stringify(text);
+                    }
+                    if(+text.code === 200) {
+                        subParams.fileName = text.fileName;
+                        $("img[attr-val]").attr('src', subParams.fileName);
+                    } else {
+                        App.promptBox('上传头像失败，请重试');
+                    }
+                } catch (args) {
+                    App.promptBox('上传头像失败，请重试');
+                }
+            };
+        }
+    </script>
+</html>

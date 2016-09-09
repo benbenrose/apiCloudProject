@@ -1,0 +1,8 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "userId": 1242379,
+    "timestamp": 1473227722375
+  }
+}

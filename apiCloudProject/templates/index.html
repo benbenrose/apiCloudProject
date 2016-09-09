@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+        <meta charset="UTF-8">
+        <title>个人中心</title>
+        <link href="../images/favorites.ico" rel="shortcut icon" type="image/x-icon">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1"/>
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="cache-control" content="no-cache">
+        <link rel="stylesheet" type="text/css" href="../styles/style.css">
+        <script type="text/javascript" src="./zepto.js"></script>
+    </head>
+    <body class="index-main-body">
+        <div class="scroll-box" style="display: none;">
+            <div class="index-header">
+                <span class="label">个人中心</span>
+            </div>
+            <div class="index-body">
+                <div class="box" et="tap:linkEvt" link-param="info">
+                    <div class="img-box">
+                        <i class="icon-cls color0c26f3">&#xe657;</i>
+                    </div>
+                    <span class="text">用户信息</span>
+                </div>
+                <div class="box" et="tap:linkEvt" link-param="apply">
+                    <div class="img-box">
+                        <i class="icon-cls color00a000">&#xe780;</i>
+                    </div>
+                    <span class="text">申请商家</span>
+                </div>
+                <div class="box" et="tap:linkEvt" link-param="consume">
+                    <div class="img-box">
+                        <i class="icon-cls">&#xe6de;</i>
+                    </div>
+                    <span class="text">消费记录</span>
+                </div>
+                <div class="box" et="tap:linkEvt" link-param="rebate">
+                    <div class="img-box">
+                        <i class="icon-cls">&#xe662;</i>
+                    </div>
+                    <span class="text">返佣记录</span>
+                </div>
+                <div class="box" et="tap:linkEvt" link-param="recharge">
+                    <div class="img-box">
+                        <i class="icon-cls colorf00">&#xe692;</i>
+                    </div>
+                    <span class="text">我要充值</span>
+                </div>
+                <div class="box" et="tap:linkEvt" link-param="withdraw">
+                    <div class="img-box">
+                        <i class="icon-cls colorf00">&#xe6e4;</i>
+                    </div>
+                    <span class="text">我要提现</span>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script type="text/javascript">
+        App.startLoading();
+        $(function () {
+            var cache = localStorage.getItem('user-login-info'),
+                    flag = true,
+                    userId = '';
+            if(cache !== null) {
+                try {
+                    cache = JSON.parse(cache);
+                    userId = cache.userId;
+                    var timestamp = cache.timestamp;
+                    if(typeof timestamp === 'undefined') {
+                        flag = false;
+                    } else {
+                        if((timestamp - Date.now()) > 30*60*1000) {
+                            flag = false;
+                        }
+                    }
+                } catch (e) {
+                    flag = false;
+                }
+            } else {
+                flag = false;
+            }
+            if(!flag) {
+                window.location.href = 'register.html';
+            } else {
+                $(".scroll-box").show();
+                App.pageEvents.linkEvt = function (node) {
+                    var flag = node.attr("link-param");
+                    switch (flag) {
+                        case 'info':
+                            window.location.href = 'edit.html';
+                            break;
+                        case 'apply':
+                            window.location.href = 'apply.html';
+                            break;
+                        case 'consume':
+                            window.location.href = 'consume.html';
+                            break;
+                        case 'rebate':
+                            window.location.href = 'rebate.html';
+                            break;
+                        case 'recharge':
+                            window.location.href = 'recharge.html';
+                            break;
+                        case 'withdraw':
+                            window.location.href = 'withdraw.html';
+                            break;
+                        default :
+                            break;
+                    }
+                };
+            }
+            App.stopLoading();
+        });
+    </script>
+</html>
